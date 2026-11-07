@@ -46,7 +46,6 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
-import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -121,7 +120,7 @@ class ClockWidget : GlanceAppWidget() {
         preferences.value[MainViewModel.PreferenceKeys.SECONDARY_TIMEZONE] ?: "Asia/Jerusalem"
       val secondaryZoneId = try {
         ZoneId.of(selectedZoneStr)
-      } catch (e: Exception) {
+      } catch (_: Exception) {
         ZoneId.of("UTC")
       }
       val secondaryTime = LocalTime.now(secondaryZoneId).toString().slice(0..4)
@@ -242,7 +241,7 @@ object WidgetUpdater {
  * link to original code:
  * https://gist.github.com/armcha/8201fc33b6e6a4aa6a7a66c7cfc1f4bb#file-glancetext-kt  **/
 
-fun Context.textAsBitmap(
+fun textAsBitmap(
   text: String,
   fontSize: TextUnit,
   color: Color = Color.Black,
@@ -280,12 +279,12 @@ fun GlanceText(
   Image(
     modifier = modifier,
     provider = ImageProvider(
-      LocalContext.current.textAsBitmap(
+      textAsBitmap(
         text = text,
         fontSize = fontSize,
         color = color,
-        font = font,
-        letterSpacing = letterSpacing.value
+        letterSpacing = letterSpacing.value,
+        font = font
       )
     ),
     contentDescription = null,

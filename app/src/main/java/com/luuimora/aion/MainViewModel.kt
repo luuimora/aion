@@ -109,7 +109,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     try {
       ZoneId.of(zone)
       secondaryTimezone.value = zone
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       return
     }
     //secondaryTimezone.value = zone

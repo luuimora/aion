@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
       AionTheme {
         Scaffold(
           modifier = Modifier.fillMaxSize()
-        ) { innerPadding ->
+        ) {
           Column(
             modifier = Modifier
               .fillMaxSize()
@@ -137,7 +137,7 @@ class MainActivity : ComponentActivity() {
               }
             }
             Text(
-              text = "Hue slider:\nValue: ${hueSliderPosition}",
+              text = "Hue slider:\nValue: $hueSliderPosition",
               fontWeight = FontWeight.Bold,
               modifier = Modifier.padding(basicPadding)
             )
@@ -147,7 +147,7 @@ class MainActivity : ComponentActivity() {
               valueRange = 0f..360f
             )
             Text(
-              text = "Saturation slider:\nValue: ${satSliderPosition}",
+              text = "Saturation slider:\nValue: $satSliderPosition",
               fontWeight = FontWeight.Bold,
               modifier = Modifier.padding(basicPadding)
             )
@@ -157,7 +157,7 @@ class MainActivity : ComponentActivity() {
               valueRange = 0f..1f
             )
             Text(
-              text = "Lightness slider:\nValue: ${lightSliderPosition}",
+              text = "Lightness slider:\nValue: $lightSliderPosition",
               fontWeight = FontWeight.Bold,
               modifier = Modifier.padding(basicPadding)
             )
