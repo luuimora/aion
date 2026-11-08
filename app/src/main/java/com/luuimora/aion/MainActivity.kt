@@ -20,13 +20,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-**/
+ **/
 
 package com.luuimora.aion
 
 
 import android.app.AlarmManager
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -59,14 +60,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -99,9 +101,9 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       val selectedColor = viewModel.mainColor.collectAsState()
-      var hueSliderPosition by remember { mutableFloatStateOf(0f) }
-      var satSliderPosition by remember { mutableFloatStateOf(0f) }
-      var lightSliderPosition by remember { mutableFloatStateOf(0f) }
+      val hueSliderPosition = viewModel.mainHue.collectAsState(180f)
+      val satSliderPosition = viewModel.mainSat.collectAsState(0.5f)
+      val valSliderPosition = viewModel.mainValue.collectAsState(0.5f)
       val selectedWidgetFormat = viewModel.widgetFormat.collectAsState()
       val widgetOptions = listOf("Duo-Digital", "Digital")
       val basicPadding = 18.dp
@@ -111,11 +113,13 @@ class MainActivity : ComponentActivity() {
       var timezoneDropdownExpanded by remember { mutableStateOf(false) }
       val timeZoneMenu = viewModel.timezones.collectAsState()
       val searchFilter = remember { mutableStateOf("") }
+      val systemColor = dynamicDarkColorScheme(applicationContext).primary
 
       AionTheme {
         Scaffold(
           modifier = Modifier.fillMaxSize()
         ) {
+
           Column(
             modifier = Modifier
               .fillMaxSize()
@@ -136,34 +140,60 @@ class MainActivity : ComponentActivity() {
                 Text(text = "Main widget color", Modifier.align(Alignment.Center))
               }
             }
+            Card(
+              modifier = Modifier
+                .height(125.dp)
+                .fillMaxWidth()
+                .padding(basicPadding),
+              colors = CardDefaults.cardColors(
+                containerColor = systemColor
+              )
+            ) {
+              Button(onClick = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                  viewModel.mainColor.value = systemColor
+                  val hsv = FloatArray(3)
+                  Color.colorToHSV(systemColor.toArgb(), hsv)
+                  viewModel.setHue(hsv[0])
+                  viewModel.setSat(hsv[1])
+                  viewModel.setValue(hsv[2])
+                }
+              }, modifier = Modifier
+                .padding(basicPadding)
+                .align(Alignment.CenterHorizontally))
+              {
+                Text("Click to set system's wallpaper main color")
+              }
+            }
+
             Text(
-              text = "Hue slider:\nValue: $hueSliderPosition",
+              text = "Hue:\n${hueSliderPosition.value}",
               fontWeight = FontWeight.Bold,
               modifier = Modifier.padding(basicPadding)
             )
             Slider(
-              value = hueSliderPosition,
-              onValueChange = { hueSliderPosition = it; viewModel.setHue(it) },
+              value = hueSliderPosition.value,
+              onValueChange = { viewModel.setHue(it) },
               valueRange = 0f..360f
             )
             Text(
-              text = "Saturation slider:\nValue: $satSliderPosition",
+              text = "Saturation:\n${satSliderPosition.value}",
               fontWeight = FontWeight.Bold,
               modifier = Modifier.padding(basicPadding)
             )
             Slider(
-              value = satSliderPosition,
-              onValueChange = { satSliderPosition = it; viewModel.setSat(it) },
+              value = satSliderPosition.value,
+              onValueChange = { viewModel.setSat(it) },
               valueRange = 0f..1f
             )
             Text(
-              text = "Lightness slider:\nValue: $lightSliderPosition",
+              text = "Value:\n${valSliderPosition.value}",
               fontWeight = FontWeight.Bold,
               modifier = Modifier.padding(basicPadding)
             )
             Slider(
-              value = lightSliderPosition,
-              onValueChange = { lightSliderPosition = it; viewModel.setLight(it) },
+              value = valSliderPosition.value,
+              onValueChange = { viewModel.setValue(it) },
               valueRange = 0f..1f
             )
             Text(

@@ -39,6 +39,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.ZoneId
@@ -73,24 +74,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   val mainColor = MutableStateFlow<Color?>(null)
 
   /** Private value for hue of main color and method to change it **/
-  private var mainHue = MutableStateFlow(0f)
+  private var _mainHue = MutableStateFlow(0f)
+  val mainHue = _mainHue.asSharedFlow()
   fun setHue(hue: Float) {
-    mainHue.value = hue
-    mainColor.value = Color.hsl(mainHue.value, mainSat.value, lightness = mainLight.value)
+    _mainHue.value = hue
+    mainColor.value = Color.hsv(_mainHue.value, _mainSat.value, value = _mainValue.value)
   }
 
   /** Private value for saturation of main color and method to change it **/
-  private var mainSat = MutableStateFlow(0.5f)
+  private var _mainSat = MutableStateFlow(0.5f)
+  val mainSat = _mainSat.asSharedFlow()
   fun setSat(sat: Float) {
-    mainSat.value = sat
-    mainColor.value = Color.hsl(mainHue.value, mainSat.value, lightness = mainLight.value)
+    _mainSat.value = sat
+    mainColor.value = Color.hsv(_mainHue.value, _mainSat.value, value = _mainValue.value)
   }
 
   /** Private value for lightness of main color and method to change it **/
-  private var mainLight = MutableStateFlow(0.5f)
-  fun setLight(value: Float) {
-    mainLight.value = value
-    mainColor.value = Color.hsl(mainHue.value, mainSat.value, lightness = mainLight.value)
+  private var _mainValue = MutableStateFlow(0.5f)
+  val mainValue = _mainValue.asSharedFlow()
+  fun setValue(value: Float) {
+    _mainValue.value = value
+    mainColor.value = Color.hsv(_mainHue.value, _mainSat.value, value = _mainValue.value)
   }
 
   /** Public flow for selected widget format **/
