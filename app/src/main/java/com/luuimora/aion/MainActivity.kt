@@ -27,7 +27,6 @@ package com.luuimora.aion
 
 import android.app.AlarmManager
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -68,6 +67,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -79,6 +79,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
+import android.graphics.Color as color
 
 
 class MainActivity : ComponentActivity() {
@@ -100,20 +101,20 @@ class MainActivity : ComponentActivity() {
     checkAndRequestExactAlarmPermission()
     enableEdgeToEdge()
     setContent {
-      val selectedColor = viewModel.mainColor.collectAsState()
+      val selectedColor = viewModel.mainColor.collectAsState(Color.Unspecified)
       val hueSliderPosition = viewModel.mainHue.collectAsState(180f)
       val satSliderPosition = viewModel.mainSat.collectAsState(0.5f)
       val valSliderPosition = viewModel.mainValue.collectAsState(0.5f)
-      val selectedWidgetFormat = viewModel.widgetFormat.collectAsState()
-      val widgetOptions = listOf("Duo-Digital", "Digital")
-      val basicPadding = 18.dp
+      val selectedWidgetFormat = viewModel.widgetFormat.collectAsState("Digital")
+      val widgetOptions = remember { listOf("Duo-Digital", "Digital") }
+      val basicPadding = remember { 18.dp }
       val showInfo = remember { mutableStateOf(false) }
       val indicateSaved = remember { mutableStateOf(false) }
       val selectedTimezone = viewModel.secondaryTimezone.collectAsState("Asia/Jerusalem")
       var timezoneDropdownExpanded by remember { mutableStateOf(false) }
       val timeZoneMenu = viewModel.timezones.collectAsState()
       val searchFilter = remember { mutableStateOf("") }
-      val systemColor = dynamicDarkColorScheme(applicationContext).primary
+      val systemColor = remember { dynamicDarkColorScheme(applicationContext).primary }
 
       AionTheme {
         Scaffold(
@@ -149,18 +150,20 @@ class MainActivity : ComponentActivity() {
                 containerColor = systemColor
               )
             ) {
-              Button(onClick = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                  viewModel.mainColor.value = systemColor
-                  val hsv = FloatArray(3)
-                  Color.colorToHSV(systemColor.toArgb(), hsv)
-                  viewModel.setHue(hsv[0])
-                  viewModel.setSat(hsv[1])
-                  viewModel.setValue(hsv[2])
-                }
-              }, modifier = Modifier
-                .padding(basicPadding)
-                .align(Alignment.CenterHorizontally))
+              Button(
+                onClick = {
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    viewModel.mainColor.value = systemColor
+                    val hsv = FloatArray(3)
+                    color.colorToHSV(systemColor.toArgb(), hsv)
+                    viewModel.setHue(hsv[0])
+                    viewModel.setSat(hsv[1])
+                    viewModel.setValue(hsv[2])
+                  }
+                }, modifier = Modifier
+                  .padding(basicPadding)
+                  .align(Alignment.CenterHorizontally)
+              )
               {
                 Text("Click to set system's wallpaper main color")
               }

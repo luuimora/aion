@@ -20,11 +20,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-**/
+ **/
 
 package com.luuimora.aion
 
-import android.graphics.Color as color
 import android.app.Application
 import android.content.Context
 import androidx.compose.ui.graphics.Color
@@ -45,6 +44,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.util.Locale.getDefault
+import android.graphics.Color as color
 
 
 /** Package-level declaration of DataStore for widget preferences **/
@@ -56,8 +56,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   init {
     viewModelScope.launch {
       val prefs = getApplication<Application>().dataStore.data.first()
+
       /** Getting Color Int **/
-      val savedColorInt = prefs[PreferenceKeys.MAIN_COLOR] ?: Color.Transparent.toArgb()
+      val savedColorInt = prefs[PreferenceKeys.MAIN_COLOR] ?: Color.Unspecified.toArgb()
       /** Writing it to mainColor flow **/
       mainColor.value = Color(savedColorInt)
       /** Extracting color components and moving UI accordingly **/
@@ -83,7 +84,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   }
 
   /** Contains main color of widget **/
-  val mainColor = MutableStateFlow(Color.Transparent)
+  val mainColor = MutableStateFlow(Color.Unspecified)
 
   /** Private value for hue of main color and method to change it **/
   private var _mainHue = MutableStateFlow(0f)
@@ -114,8 +115,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   /** Private flow for selected timezone format **/
   private val _secondaryTimezone = MutableStateFlow("Asia/Jerusalem")
+
   /** Public flow for selected timezone format **/
   val secondaryTimezone = _secondaryTimezone.asSharedFlow()
+
   /** Method to update selected widget format in ViewModel **/
   fun updateWidgetFormat(format: String) {
     widgetFormat.value = format
