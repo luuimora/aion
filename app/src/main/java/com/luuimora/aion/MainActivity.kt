@@ -36,6 +36,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -114,13 +115,18 @@ class MainActivity : ComponentActivity() {
       var timezoneDropdownExpanded by remember { mutableStateOf(false) }
       val timeZoneMenu = viewModel.timezones.collectAsState()
       val searchFilter = remember { mutableStateOf("") }
-      val systemColor = remember { dynamicDarkColorScheme(applicationContext).primary }
+      val dynamicColor = remember {
+        arrayOf(
+          dynamicDarkColorScheme(applicationContext).primary,
+          dynamicDarkColorScheme(applicationContext).secondary,
+          dynamicDarkColorScheme(applicationContext).tertiary
+        )
+      }
 
       AionTheme {
         Scaffold(
           modifier = Modifier.fillMaxSize()
         ) {
-
           Column(
             modifier = Modifier
               .fillMaxSize()
@@ -132,7 +138,8 @@ class MainActivity : ComponentActivity() {
               modifier = Modifier
                 .fillMaxWidth()
                 .height(125.dp)
-                .align(Alignment.CenterHorizontally),
+                .align(Alignment.CenterHorizontally)
+                .padding(basicPadding),
               colors = CardDefaults.cardColors(
                 containerColor = selectedColor.value
               )
@@ -141,34 +148,35 @@ class MainActivity : ComponentActivity() {
                 Text(text = "Main widget color", Modifier.align(Alignment.Center))
               }
             }
-            Card(
-              modifier = Modifier
-                .height(125.dp)
-                .fillMaxWidth()
-                .padding(basicPadding),
-              colors = CardDefaults.cardColors(
-                containerColor = systemColor
-              )
-            ) {
-              Button(
-                onClick = {
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    viewModel.mainColor.value = systemColor
-                    val hsv = FloatArray(3)
-                    color.colorToHSV(systemColor.toArgb(), hsv)
-                    viewModel.setHue(hsv[0])
-                    viewModel.setSat(hsv[1])
-                    viewModel.setValue(hsv[2])
-                  }
-                }, modifier = Modifier
-                  .padding(basicPadding)
-                  .align(Alignment.CenterHorizontally)
-              )
-              {
-                Text("Click to set system's wallpaper main color")
+            Text(
+              text = "Select on of the dynamic system colors:",
+              modifier = Modifier.padding(basicPadding),
+              fontWeight = FontWeight.Bold
+            )
+            Row() {
+              dynamicColor.forEach { systemColor ->
+                Card(
+                  modifier = Modifier
+                    .height(125.dp)
+                    .weight(0.2f)
+                    .padding(basicPadding)
+                    .clickable(onClick = {
+                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        viewModel.mainColor.value = systemColor
+                        val hsv = FloatArray(3)
+                        color.colorToHSV(systemColor.toArgb(), hsv)
+                        viewModel.setHue(hsv[0])
+                        viewModel.setSat(hsv[1])
+                        viewModel.setValue(hsv[2])
+                      }
+                    }),
+                  colors = CardDefaults.cardColors(
+                    containerColor = systemColor
+                  ),
+                  content = {}
+                )
               }
             }
-
             Text(
               text = "Hue:\n${hueSliderPosition.value}",
               fontWeight = FontWeight.Bold,
