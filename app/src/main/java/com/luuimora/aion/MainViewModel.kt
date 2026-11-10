@@ -24,6 +24,7 @@ SOFTWARE.
 
 package com.luuimora.aion
 
+import android.graphics.Color as color
 import android.app.Application
 import android.content.Context
 import androidx.compose.ui.graphics.Color
@@ -51,17 +52,27 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
+  /** Load saved preferences on startup **/
   init {
-    // Load saved preferences on startup
     viewModelScope.launch {
       val prefs = getApplication<Application>().dataStore.data.first()
-      val savedColorInt = prefs[PreferenceKeys.MAIN_COLOR]
-      if (savedColorInt != null) {
-        mainColor.value = Color(savedColorInt)
-      }
+      /** Getting Color Int **/
+      val savedColorInt = prefs[PreferenceKeys.MAIN_COLOR] ?: Color.Transparent.toArgb()
+      /** Writing it to mainColor flow **/
+      mainColor.value = Color(savedColorInt)
+      /** Extracting color components and moving UI accordingly **/
+      val hsv = FloatArray(3)
+      color.colorToHSV(savedColorInt, hsv)
+      _mainHue.value = hsv[0]
+      _mainSat.value = hsv[1]
+      _mainValue.value = hsv[2]
+      /** Also getting widget format **/
       widgetFormat.value = prefs[PreferenceKeys.WIDGET_FORMAT] ?: "Digital"
+      /** And font! (if exists) **/
       fontFile = prefs[PreferenceKeys.CUSTOM_FONT]
 
+      /** This is array of available timezones which is 500+ positions of length,
+      therefore, we process it before user would get to clicking on UI to display it **/
       val timeZones = ZoneId.getAvailableZoneIds()
         .filter { ("/" in it || it.length > 3 || it.uppercase(getDefault()) != it) }
         .distinctBy { it.substringAfter("/") }
@@ -71,7 +82,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   }
 
   /** Contains main color of widget **/
-  val mainColor = MutableStateFlow<Color?>(null)
+  val mainColor = MutableStateFlow(Color.Transparent)
 
   /** Private value for hue of main color and method to change it **/
   private var _mainHue = MutableStateFlow(0f)
@@ -135,7 +146,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     viewModelScope.launch(Dispatchers.IO) {
       context.dataStore.edit { settings ->
         settings[PreferenceKeys.WIDGET_FORMAT] = widgetFormat.value
-        settings[PreferenceKeys.MAIN_COLOR] = mainColor.value?.toArgb() ?: 0
+        settings[PreferenceKeys.MAIN_COLOR] = mainColor.value.toArgb()
         settings[PreferenceKeys.CUSTOM_FONT] = fontFile ?: ""
         settings[PreferenceKeys.SECONDARY_TIMEZONE] = secondaryTimezone.value
       }
