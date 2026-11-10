@@ -70,6 +70,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
       widgetFormat.value = prefs[PreferenceKeys.WIDGET_FORMAT] ?: "Digital"
       /** And font! (if exists) **/
       fontFile = prefs[PreferenceKeys.CUSTOM_FONT]
+      _secondaryTimezone.value = prefs[PreferenceKeys.SECONDARY_TIMEZONE] ?: "Asia/Jerusalem"
 
       /** This is array of available timezones which is 500+ positions of length,
       therefore, we process it before user would get to clicking on UI to display it **/
@@ -111,9 +112,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   /** Public flow for selected widget format **/
   val widgetFormat = MutableStateFlow("")
 
+  /** Private flow for selected timezone format **/
+  private val _secondaryTimezone = MutableStateFlow("Asia/Jerusalem")
   /** Public flow for selected timezone format **/
-  val secondaryTimezone = MutableStateFlow("Asia/Jerusalem")
-
+  val secondaryTimezone = _secondaryTimezone.asSharedFlow()
   /** Method to update selected widget format in ViewModel **/
   fun updateWidgetFormat(format: String) {
     widgetFormat.value = format
@@ -123,11 +125,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   fun updateSecondaryTimezone(zone: String) {
     try {
       ZoneId.of(zone)
-      secondaryTimezone.value = zone
+      _secondaryTimezone.value = zone
     } catch (_: Exception) {
       return
     }
-    //secondaryTimezone.value = zone
   }
 
   val timezones = MutableStateFlow(emptyList<String>())
@@ -148,7 +149,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         settings[PreferenceKeys.WIDGET_FORMAT] = widgetFormat.value
         settings[PreferenceKeys.MAIN_COLOR] = mainColor.value.toArgb()
         settings[PreferenceKeys.CUSTOM_FONT] = fontFile ?: ""
-        settings[PreferenceKeys.SECONDARY_TIMEZONE] = secondaryTimezone.value
+        settings[PreferenceKeys.SECONDARY_TIMEZONE] = _secondaryTimezone.value
       }
       /** Updating the widget after updating settings in DataStore **/
       val manager = GlanceAppWidgetManager(context)

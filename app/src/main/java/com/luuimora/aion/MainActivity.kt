@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
       val basicPadding = 18.dp
       val showInfo = remember { mutableStateOf(false) }
       val indicateSaved = remember { mutableStateOf(false) }
-      val selectedTimezone = viewModel.secondaryTimezone.collectAsState()
+      val selectedTimezone = viewModel.secondaryTimezone.collectAsState("Asia/Jerusalem")
       var timezoneDropdownExpanded by remember { mutableStateOf(false) }
       val timeZoneMenu = viewModel.timezones.collectAsState()
       val searchFilter = remember { mutableStateOf("") }
