@@ -51,6 +51,43 @@ import android.graphics.Color as color
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+  /** Contains main color of widget **/
+  val mainColor = MutableStateFlow(Color.Unspecified)
+
+  /** Private value for hue of main color and method to change it **/
+  private var _mainHue = MutableStateFlow(0f)
+  val mainHue = _mainHue.asSharedFlow()
+
+  /** Private value for saturation of main color and method to change it **/
+  private var _mainSat = MutableStateFlow(0.5f)
+  val mainSat = _mainSat.asSharedFlow()
+
+  /** Private value for lightness of main color and method to change it **/
+  private var _mainValue = MutableStateFlow(0.5f)
+  val mainValue = _mainValue.asSharedFlow()
+
+  /** Public flow for selected widget format **/
+  val widgetFormat = MutableStateFlow("")
+
+  /** Private flow for selected timezone format **/
+  private val _secondaryTimezone = MutableStateFlow("Asia/Jerusalem")
+
+  /** Public flow for selected timezone format **/
+  val secondaryTimezone = _secondaryTimezone.asSharedFlow()
+
+  val timezones = MutableStateFlow(emptyList<String>())
+
+  /** Initialization of DataStore **/
+  object PreferenceKeys {
+    val WIDGET_FORMAT = stringPreferencesKey("widget_format")
+    val MAIN_COLOR = intPreferencesKey("main_color")
+
+    val CUSTOM_FONT = stringPreferencesKey("uri_font")
+    val SECONDARY_TIMEZONE = stringPreferencesKey("secondary_tmz")
+  }
+
+  /** Value for font file path in cache **/
+  var fontFile: String? = null
 
   /** Load saved preferences on startup **/
   init {
@@ -83,41 +120,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
   }
 
-  /** Contains main color of widget **/
-  val mainColor = MutableStateFlow(Color.Unspecified)
-
-  /** Private value for hue of main color and method to change it **/
-  private var _mainHue = MutableStateFlow(0f)
-  val mainHue = _mainHue.asSharedFlow()
   fun setHue(hue: Float) {
     _mainHue.value = hue
     mainColor.value = Color.hsv(_mainHue.value, _mainSat.value, value = _mainValue.value)
   }
 
-  /** Private value for saturation of main color and method to change it **/
-  private var _mainSat = MutableStateFlow(0.5f)
-  val mainSat = _mainSat.asSharedFlow()
   fun setSat(sat: Float) {
     _mainSat.value = sat
     mainColor.value = Color.hsv(_mainHue.value, _mainSat.value, value = _mainValue.value)
   }
 
-  /** Private value for lightness of main color and method to change it **/
-  private var _mainValue = MutableStateFlow(0.5f)
-  val mainValue = _mainValue.asSharedFlow()
   fun setValue(value: Float) {
     _mainValue.value = value
     mainColor.value = Color.hsv(_mainHue.value, _mainSat.value, value = _mainValue.value)
   }
-
-  /** Public flow for selected widget format **/
-  val widgetFormat = MutableStateFlow("")
-
-  /** Private flow for selected timezone format **/
-  private val _secondaryTimezone = MutableStateFlow("Asia/Jerusalem")
-
-  /** Public flow for selected timezone format **/
-  val secondaryTimezone = _secondaryTimezone.asSharedFlow()
 
   /** Method to update selected widget format in ViewModel **/
   fun updateWidgetFormat(format: String) {
@@ -132,17 +148,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     } catch (_: Exception) {
       return
     }
-  }
-
-  val timezones = MutableStateFlow(emptyList<String>())
-
-  /** Initialization of DataStore **/
-  object PreferenceKeys {
-    val WIDGET_FORMAT = stringPreferencesKey("widget_format")
-    val MAIN_COLOR = intPreferencesKey("main_color")
-
-    val CUSTOM_FONT = stringPreferencesKey("uri_font")
-    val SECONDARY_TIMEZONE = stringPreferencesKey("secondary_tmz")
   }
 
   /** Method that invokes by UI to update DataStore AND trigger re-rendering of widgets **/
@@ -163,8 +168,4 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
       }
     }
   }
-
-  /** Value for font file path in cache **/
-  var fontFile: String? = null
-
 }
